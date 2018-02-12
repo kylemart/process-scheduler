@@ -36,8 +36,9 @@ quantum line simply be commented out when not in use.
 
 ## Usage
 
-After building the executable binary (see [Building](#Building)), and including
-a file called `processes.in` in your current working directory (see [Input Format](#Input-Format)), you can run the program simply by executing
+After building the executable binary (see [Building](#building)), and including
+a file called `processes.in` in your current working directory
+(see [Input Format](#input-format)), you can run the program simply by executing
 `./bin/scheduler` from the command line. For illustrative purposes:
 
 ```
