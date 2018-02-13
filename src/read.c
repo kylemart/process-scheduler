@@ -3,14 +3,8 @@
 #include <read.h>
 #include <process.h>
 
-#define FMT_PROCESSCOUNT (0)
-#define FMT_RUNFOR       (1)
-#define FMT_USE          (2)
-#define FMT_QUANTUM      (3)
-#define FMT_PROCESS      (4)
-#define FMT_END_LINE     (5)
-#define END              ("end")
-#define COMMENT          ('#')
+#define END     ("end")
+#define COMMENT ('#')
 
 ulong lineno;
 
@@ -18,17 +12,7 @@ typedef struct
 {
     const char * const string;
     const size_t arg_count;
-}
-ScanFormat;
-
-ScanFormat formats[] = {
-    { "processcount %zu", 1 },
-    { "runfor %u", 1 },
-    { "use %5s", 1 },
-    { "quantum %u", 1 },
-    { "process name %20s arrival %u burst %u", 3 },
-    { "%4s", 1 }
-};
+} ScanFormat;
 
 static void preprocess(char *line, size_t length)
 {
@@ -50,26 +34,23 @@ static bool get_line_str(char **line, FILE *stream)
     return false;
 }
 
-static bool scanf_line(FILE *stream, int fmt, ...)
+static bool scanf_line(FILE *stream, ScanFormat *fmt, ...)
 {
     char *line = NULL;
     if (!get_line_str(&line, stream)) {
         return false;
     }
-
-    ScanFormat *format = &formats[fmt];
-
     va_list arg;
     va_start(arg, fmt);
-    int scan_count = vsscanf(line, format->string, arg);
+    int scan_count = vsscanf(line, fmt->string, arg);
     va_end(arg);
-
-    return scan_count == format->arg_count;
+    return scan_count == fmt->arg_count;
 }
 
 bool read_processcount(size_t *result, FILE *stream)
 {
-    if (scanf_line(stream, FMT_PROCESSCOUNT, result)) {
+    ScanFormat fmt = { "processcount %zu", 1 };
+    if (scanf_line(stream, &fmt, result)) {
         ++lineno;
         return true;
     }
@@ -78,7 +59,8 @@ bool read_processcount(size_t *result, FILE *stream)
 
 bool read_runfor(uint *result, FILE *stream)
 {
-    if (scanf_line(stream, FMT_RUNFOR, result)) {
+    ScanFormat fmt = { "runfor %u", 1 };
+    if (scanf_line(stream, &fmt, result)) {
         ++lineno;
         return true;
     }
@@ -101,8 +83,9 @@ static SchedulerType to_schedulertype(const char *str)
 
 bool read_use(SchedulerType *result, FILE *stream)
 {
+    ScanFormat fmt = { "use %5s", 1 };
     char use[6];
-    if (scanf_line(stream, FMT_USE, &use)) {
+    if (scanf_line(stream, &fmt, &use)) {
         *result = to_schedulertype(use);
         if (*result != SCHEDULER_UNDEF) {
             ++lineno;
@@ -114,7 +97,8 @@ bool read_use(SchedulerType *result, FILE *stream)
 
 bool read_quantum(uint *result, FILE *stream)
 {
-    if (scanf_line(stream, FMT_QUANTUM, result)) {
+    ScanFormat fmt = { "quantum %u", 1 };
+    if (scanf_line(stream, &fmt, result)) {
         ++lineno;
         return true;
     }
@@ -123,15 +107,14 @@ bool read_quantum(uint *result, FILE *stream)
 
 static bool read_process(Process **result, FILE *stream)
 {
+    ScanFormat fmt = { "process name %20s arrival %u burst %u", 3 };
     char name[21];
     uint arrival = 0;
     uint burst = 0;
-    if (!scanf_line(stream, FMT_PROCESS, &name, &arrival, &burst)) {
+    if (!scanf_line(stream, &fmt, &name, &arrival, &burst)) {
         return false;
     }
-
     *result = process_new(name, arrival, burst);
-
     ++lineno;
     return true;
 }
@@ -147,16 +130,15 @@ bool read_processes(ProcessList **result, size_t n, FILE *stream)
         }
         processlist_add(list, process);
     }
-
     *result = list;
-
     return true;
 }
 
 bool read_end(FILE *stream)
 {
+    ScanFormat fmt = { "%4s", 1 };
     char line[5];
-    if (scanf_line(stream, FMT_END_LINE, line)) {
+    if (scanf_line(stream, &fmt, line)) {
         return strcmp(line, END) == 0;
     }
     return false;
