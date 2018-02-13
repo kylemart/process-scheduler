@@ -43,9 +43,9 @@ static bool get_line_str(char **line, FILE *stream)
 {
     size_t size;
     ssize_t length = getline(line, &size, stream);
+    ++lineno;
     if (length >= 0) {
         preprocess(*line, length);
-        ++lineno;
         return true;
     }
     return false;
