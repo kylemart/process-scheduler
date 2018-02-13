@@ -16,8 +16,8 @@ ulong lineno;
 
 typedef struct
 {
-    const char *string;
-    size_t arg_count;
+    const char * const string;
+    size_t const arg_count;
 }
 ScanFormat;
 
