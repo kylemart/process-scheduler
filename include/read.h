@@ -9,8 +9,6 @@ extern ulong lineno;
 
 bool read_use(SchedulerType *result, FILE *stream);
 
-bool read_process(Process **result, FILE *stream);
-
 bool read_processes(ProcessList **result, size_t n, FILE *stream);
 
 bool read_runfor(uint *result, FILE *stream);

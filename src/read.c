@@ -93,7 +93,7 @@ bool read_quantum(uint *result, FILE *stream)
     return scanf_line(stream, FMT_QUANTUM, result);
 }
 
-bool read_process(Process **result, FILE *stream)
+static bool read_process(Process **result, FILE *stream)
 {
     char name[21];
     uint arrival = 0;
