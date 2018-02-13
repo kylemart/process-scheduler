@@ -20,6 +20,4 @@ typedef enum SchedulerType {
 
 SchedulerType to_schedulertype(const char *str);
 
-const char *from_schedulertype(SchedulerType type);
-
 #endif

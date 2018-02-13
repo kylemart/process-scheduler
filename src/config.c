@@ -19,11 +19,6 @@ SchedulerType config_use(Config *config)
     return config->use;
 }
 
-const char *config_use_str(Config *config)
-{
-    return from_schedulertype(config->use);
-}
-
 uint config_runfor(Config *config)
 {
     return config->runfor;

@@ -14,18 +14,3 @@ SchedulerType to_schedulertype(const char *str)
     }
     return SCHEDULER_UNDEF;
 }
-
-const char *from_schedulertype(SchedulerType type)
-{
-    switch (type)
-    {
-        case SCHEDULER_FCFS:
-            return "fcfs";
-        case SCHEDULER_SJF:
-            return "sjf";
-        case SCHEDULER_RR:
-            return "rr";
-        default:
-            return "undef";
-    }
-}
