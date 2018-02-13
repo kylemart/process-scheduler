@@ -52,10 +52,4 @@ uint config_quantum(Config *config);
  */
 ProcessList *config_processes(Config *config);
 
-/**
- * @param  config The configuration object to query.
- * @return        The number of processes contained within.
- */
-size_t config_processcount(Config *config);
-
 #endif

@@ -12,6 +12,7 @@ struct Process
 struct ProcessList
 {
     Process **items;
+    size_t capacity;
     size_t size;
 };
 
@@ -56,18 +57,19 @@ uint process_arrival(Process *process)
     return process->arrival;
 }
 
-ProcessList *processlist_new(size_t size)
+ProcessList *processlist_new(size_t capacity)
 {
     ProcessList *list = malloc(sizeof(ProcessList));
     if (!list) {
         error_abort(ERROR_MSG_MALLOC);
     }
-    list->items = calloc(size, sizeof(Process *));
+    list->items = calloc(capacity, sizeof(Process *));
     if (!list->items) {
         free(list);
         error_abort(ERROR_MSG_MALLOC);
     }
-    list->size = size;
+    list->capacity = capacity;
+    list->size = 0;
     return list;
 }
 
@@ -79,12 +81,13 @@ size_t processlist_size(ProcessList *list)
     return list->size;
 }
 
-void processlist_set(ProcessList *list, size_t index, Process *process)
+bool processlist_add(ProcessList *list, Process *process)
 {
-    if (!list) {
-        return;
+    if (!list || list->size == list->capacity) {
+        return false;
     }
-    list->items[index] = process;
+    list->items[list->size++] = process;
+    return true;
 }
 
 Process *processlist_get(ProcessList *list, size_t index)
