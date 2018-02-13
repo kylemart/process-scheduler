@@ -1,8 +1,15 @@
 #ifndef SCHEDULER_H
 #define SCHEDULER_H
 
-#include <config.h>
+#include <stdio.h>
 #include <process.h>
+
+typedef enum SchedulerType {
+    SCHEDULER_FCFS, // first in first out
+    SCHEDULER_SJF,  // shortest job first
+    SCHEDULER_RR,   // round robin
+    SCHEDULER_UNDEF // undefined
+} SchedulerType;
 
 /**
  * Runs a "first come, first served" scheduler simulation.

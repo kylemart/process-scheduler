@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <config.h>
 #include <error.h>
-#include <scheduler.h>
 
 static Config *config = NULL;
 

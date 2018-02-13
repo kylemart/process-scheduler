@@ -4,7 +4,11 @@
 #include <stdbool.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <scheduler.h>
+#include <process.h>
 #include <types.h>
+
+typedef struct Config Config;
 
 /**
  * Each line read while loading a configuration file will increment this value.

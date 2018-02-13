@@ -3,6 +3,7 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <scheduler.h>
 #include <types.h>
 
 /**

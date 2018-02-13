@@ -85,6 +85,20 @@ bool read_runfor(uint *result, FILE *stream)
     return false;
 }
 
+static SchedulerType to_schedulertype(const char *str)
+{
+    if (strcmp(str, "fcfs") == 0) {
+        return SCHEDULER_FCFS;
+    }
+    else if (strcmp(str, "rr") == 0) {
+        return SCHEDULER_RR;
+    }
+    else if (strcmp(str, "sjf") == 0) {
+        return SCHEDULER_SJF;
+    }
+    return SCHEDULER_UNDEF;
+}
+
 bool read_use(SchedulerType *result, FILE *stream)
 {
     char use[6];

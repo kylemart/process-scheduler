@@ -7,6 +7,8 @@
 
 // #region Process -------------------------------------------------------------
 
+typedef struct Process Process;
+
 /**
  * @param  name    The name of the process
  * @param  arrival The arrival time of the process
@@ -43,6 +45,8 @@ uint process_arrival(Process *process);
 // #endregion ------------------------------------------------------------------
 
 // #region ProcessList ---------------------------------------------------------
+
+typedef struct ProcessList ProcessList;
 
 /**
  * @param  capacity The maximum capacity of the process list
