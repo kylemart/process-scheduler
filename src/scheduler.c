@@ -4,7 +4,7 @@
 
 #define min(x, y) ((x < y) ? x : y)
 
-// #region Job Utilities and Data-Structures
+// #region Job(s) --------------------------------------------------------------
 
 typedef struct Job
 {
@@ -14,14 +14,6 @@ typedef struct Job
     uint wait;
     uint turnaround;
 } Job;
-
-typedef struct JobQueue
-{
-    size_t capacity;
-    size_t size;
-    size_t start;
-    Job **jobs;
-} JobQueue;
 
 static Job *jobs_new(ProcessList *processes)
 {
@@ -47,6 +39,18 @@ static void jobs_destroy(Job *jobs)
 {
     free(jobs);
 }
+
+// #endregion ------------------------------------------------------------------
+
+// #region JobQueue ------------------------------------------------------------
+
+typedef struct JobQueue
+{
+    size_t capacity;
+    size_t size;
+    size_t start;
+    Job **jobs;
+} JobQueue;
 
 static JobQueue *jobq_new(size_t capacity)
 {
@@ -107,9 +111,9 @@ static void jobq_lshift(JobQueue *q)
     jobq_add(q, removed);
 }
 
-// #endregion
+// #endregion ------------------------------------------------------------------
 
-// #region Scheduling Algorithms
+// #region Scheduling Algorithms -----------------------------------------------
 
 void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 {
@@ -190,4 +194,4 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
     jobq_destroy(ready);
 }
 
-// #endregion
+// #endregion ------------------------------------------------------------------

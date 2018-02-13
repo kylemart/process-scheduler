@@ -2,18 +2,13 @@
 #include <error.h>
 #include <process.h>
 
+// #region Process -------------------------------------------------------------
+
 struct Process
 {
     char *name;
     uint arrival;
     uint burst;
-};
-
-struct ProcessList
-{
-    Process **items;
-    size_t capacity;
-    size_t size;
 };
 
 Process *process_new(char *name, uint arrival, uint burst)
@@ -56,6 +51,17 @@ uint process_arrival(Process *process)
 {
     return process->arrival;
 }
+
+// #endregion ------------------------------------------------------------------
+
+// #region ProcessList ---------------------------------------------------------
+
+struct ProcessList
+{
+    Process **items;
+    size_t capacity;
+    size_t size;
+};
 
 ProcessList *processlist_new(size_t capacity)
 {
@@ -108,3 +114,5 @@ void processlist_destroy(ProcessList *list)
     }
     free(list);
 }
+
+// #endregion ------------------------------------------------------------------
