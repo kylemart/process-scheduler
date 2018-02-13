@@ -8,8 +8,8 @@
 
 typedef struct Job
 {
-    const char * const name;
-    const uint start;
+    const char *name;
+    uint start;
     uint burst;
     uint wait;
     uint turnaround;
