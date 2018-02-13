@@ -5,54 +5,55 @@
 #include <stdlib.h>
 #include <types.h>
 
+// #region Process -------------------------------------------------------------
+
 /**
- * Creates a new process object and returns a pointer to it.
- *
- * @param  name    The name of the process.
- * @param  arrival The arrival time of the process.
- * @param  burst   The burst time of the process.
- * @return         A pointer to a new process.
+ * @param  name    The name of the process
+ * @param  arrival The arrival time of the process
+ * @param  burst   The burst time of the process
+ * @return         A pointer to a new process
  */
 Process *process_new(char *name, uint arrival, uint burst);
 
 /**
- * Destroys all memory associated with a process object. Will not complain
- * if the process pointer is NULL.
+ * Frees all memory associated with a process object.
  *
- * @param process The process to drop kick into the void.
+ * @param process A pointer to a process object to DROP KICK
  */
 void process_destroy(Process *process);
 
 /**
- * @param  config The process object to query.
- * @return        The name of the process object.
+ * @param  config A pointer to a process object
+ * @return        The name of the process object
  */
 const char *process_name(Process *process);
 
 /**
- * @param  process The process object to query.
- * @return         The burst time of the process.
+ * @param  process A pointer to a process object
+ * @return         The burst time of the process
  */
 uint process_burst(Process *process);
 
 /**
- * @param  process The process object to query.
- * @return         The arrival time of the process.
+ * @param  process A pointer to a process object
+ * @return         The arrival time of the process
  */
 uint process_arrival(Process *process);
 
+// #endregion ------------------------------------------------------------------
+
+// #region ProcessList ---------------------------------------------------------
+
 /**
- * Creates a new process list object and returns a pointer to it.
- *
- * @param  capacity The maximum number of processes that can be stored.
- * @return          A pointer to a new process.
+ * @param  capacity The maximum capacity of the process list
+ * @return          A pointer to a new process list
  */
 ProcessList *processlist_new(size_t capacity);
 
 /**
- * Destorys a process list object.
+ * Frees all memory associated with a process list object.
  *
- * @param list The process list to disintegrate with a space lazer.
+ * @param list A pointer to the process list object to DISINTEGRATE
  */
 void processlist_destroy(ProcessList *list);
 
@@ -60,24 +61,23 @@ void processlist_destroy(ProcessList *list);
  * If the capacity of the list has not been reached, append a process to the
  * end of the list.
  *
- * @param list    A pointer to the list to append to
- * @param process A pointer to the process being added
+ * @param list    A pointer to the process list to append to
+ * @param process A pointer to the process being appended
  */
 bool processlist_add(ProcessList *list, Process *process);
 
 /**
- * @param  list The process list object to query.
- * @return      The size of the process list.
+ * @param  list A pointer to a process list
+ * @return      The logical size of the list
  */
 size_t processlist_size(ProcessList *list);
 
 /**
- * Returns the process pointer stored at the specified index in the list.
- *
- * @param  list  The process list object to query.
- * @param  index The index of the process pointer to retrieve.
- * @return       A pointer to the retrieved process object.
+ * @param  list  A pointer to a process list
+ * @return       A pointer to the i-th process in the list
  */
 Process *processlist_get(ProcessList *list, size_t index);
+
+// #endregion ------------------------------------------------------------------
 
 #endif
