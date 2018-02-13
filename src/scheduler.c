@@ -142,7 +142,7 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
     for (uint tick = 0; tick < runfor; ++tick) {
         for (size_t i = 0; i < jobcount; ++i) {
             Job *job = &jobs[i];
-            if (job->start < tick && job->burst != 0) {
+            if (job->start < tick && job->burst > 0) {
                 if (job != selected) {
                     ++job->wait;
                 }
@@ -173,16 +173,21 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
         else {
             selected = jobq_peek(ready);
             timeleft = min(selected->burst, quantum);
-            fprintf(out, "Time %u: %s selected (burst %u)\n",
-                tick, selected->name, selected->burst);
+            fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
+                selected->name, selected->burst);
         }
     }
     fprintf(out, "Finished at time %u\n\n", runfor);
 
     for (size_t i = 0; i < jobcount; ++i) {
         Job *job = &jobs[i];
-        fprintf(out, "%s wait %u turnaround %u\n",
-            job->name, job->wait, job->turnaround);
+        if (job->burst > 0) {
+            fprintf(out, "%s wait %u turnaround ?\n", job->name, job->wait);
+        }
+        else {
+            fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait,
+                job->turnaround);
+        }
     }
 
     jobs_destroy(jobs);
