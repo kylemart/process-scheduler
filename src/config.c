@@ -38,7 +38,7 @@ bool config_load(Config **dest, FILE *cf)
 {
     Config cfg = { 0, 0, SCHEDULER_UNDEF, NULL };
     size_t cnt = 0;
-    lineno = 0;
+    lineno = 1;
 
     if (!read_processcount(&cnt, cf)) {
         return false;

@@ -43,7 +43,6 @@ static bool get_line_str(char **line, FILE *stream)
 {
     size_t size;
     ssize_t length = getline(line, &size, stream);
-    ++lineno;
     if (length >= 0) {
         preprocess(*line, length);
         return true;
@@ -70,12 +69,20 @@ static bool scanf_line(FILE *stream, int fmt, ...)
 
 bool read_processcount(size_t *result, FILE *stream)
 {
-    return scanf_line(stream, FMT_PROCESSCOUNT, result);
+    if (scanf_line(stream, FMT_PROCESSCOUNT, result)) {
+        ++lineno;
+        return true;
+    }
+    return false;
 }
 
 bool read_runfor(uint *result, FILE *stream)
 {
-    return scanf_line(stream, FMT_RUNFOR, result);
+    if (scanf_line(stream, FMT_RUNFOR, result)) {
+        ++lineno;
+        return true;
+    }
+    return false;
 }
 
 bool read_use(SchedulerType *result, FILE *stream)
@@ -83,14 +90,21 @@ bool read_use(SchedulerType *result, FILE *stream)
     char use[6];
     if (scanf_line(stream, FMT_USE, &use)) {
         *result = to_schedulertype(use);
-        return *result != SCHEDULER_UNDEF;
+        if (*result != SCHEDULER_UNDEF) {
+            ++lineno;
+            return true;
+        }
     }
     return false;
 }
 
 bool read_quantum(uint *result, FILE *stream)
 {
-    return scanf_line(stream, FMT_QUANTUM, result);
+    if (scanf_line(stream, FMT_QUANTUM, result)) {
+        ++lineno;
+        return true;
+    }
+    return false;
 }
 
 static bool read_process(Process **result, FILE *stream)
@@ -104,6 +118,7 @@ static bool read_process(Process **result, FILE *stream)
 
     *result = process_new(name, arrival, burst);
 
+    ++lineno;
     return true;
 }
 
