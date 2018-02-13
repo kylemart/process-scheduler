@@ -116,7 +116,7 @@ bool read_processes(ProcessList **result, size_t n, FILE *stream)
             processlist_destroy(list);
             return false;
         }
-        processlist_set(list, i, process);
+        processlist_add(list, process);
     }
 
     *result = list;

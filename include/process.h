@@ -1,6 +1,7 @@
 #ifndef PROCESS_H
 #define PROCESS_H
 
+#include <stdbool.h>
 #include <stdlib.h>
 #include <types.h>
 
@@ -56,13 +57,13 @@ ProcessList *processlist_new(size_t capacity);
 void processlist_destroy(ProcessList *list);
 
 /**
- * Stores a pointer to a process in the list at the specified index.
+ * If the capacity of the list has not been reached, append a process to the
+ * end of the list.
  *
- * @param list    The process list to populate.
- * @param index   The index in the list to assign the process pointer to.
- * @param process The process pointer being stored in the list.
+ * @param list    A pointer to the list to append to
+ * @param process A pointer to the process being added
  */
-void processlist_set(ProcessList *list, size_t index, Process *process);
+bool processlist_add(ProcessList *list, Process *process);
 
 /**
  * @param  list The process list object to query.
