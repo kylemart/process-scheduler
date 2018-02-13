@@ -36,12 +36,6 @@ SchedulerType config_use(Config *config);
 
 /**
  * @param  config The configuration object to query.
- * @return        The type of scheduer to use (as a string).
- */
-const char *config_use_str(Config *config);
-
-/**
- * @param  config The configuration object to query.
  * @return        The amount of time to run the scheduler for.
  */
 uint config_runfor(Config *config);
