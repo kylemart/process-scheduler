@@ -20,8 +20,6 @@ extern ulong lineno;
  */
 bool read_use(SchedulerType *result, FILE *stream);
 
-bool read_process(Process **result, FILE *stream);
-
 /**
  * Reads a specified number of lines, and parses a process from each of them.
  *
