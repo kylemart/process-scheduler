@@ -34,11 +34,6 @@ ProcessList *config_processes(Config *config)
     return config->processes;
 }
 
-size_t config_processcount(Config *config)
-{
-    return processlist_size(config->processes);
-}
-
 bool config_load(Config **dest, FILE *cf)
 {
     Config cfg = { 0, 0, SCHEDULER_UNDEF, NULL };
