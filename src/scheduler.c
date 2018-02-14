@@ -140,7 +140,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     // Starting the actual SJF code now
     // Make a for loop that goes one at a time through each tick till we run out of time
     Job *jobs = jobs_new(processes);
-    uint min = 0;
+    uint min = 10000;
    for(uint tick = 0; tick < runfor; tick++){
    		fprintf(out, "Time %u: ", tick);
     	// Here I am looping through each process to check its burst time
@@ -158,7 +158,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 		}
 		Job *job = &jobs[min];
 		job->burst--;
-		
+		min = 10000;
 	}
     
     
