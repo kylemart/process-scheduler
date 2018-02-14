@@ -3,7 +3,7 @@
 # Author: Kyle Martinez
 
 from filecmp import cmp
-from subprocess import call
+from subprocess import PIPE, run
 from shutil import copy
 import os
 import sys
@@ -13,8 +13,11 @@ NUM_TESTCASES = 4
 print("----------------------------------------------------------------------")
 print("COMPILING")
 print("----------------------------------------------------------------------")
-if call("make") != 0:
-    print("✖ Failure! Try manually building to inspect the problem.")
+
+with open(os.devnull, 'w') as devnull:
+    result = run("make", stdout=devnull, stderr=PIPE)
+if result.stderr:
+    print("✖ Failure! Please manually build to determine the cause.")
     sys.exit(1)
 else:
     print("✓ Success!")
@@ -22,26 +25,31 @@ else:
 print("----------------------------------------------------------------------")
 print("RUNNING ACCEPTANCE TESTS")
 print("----------------------------------------------------------------------")
-os.chdir("./tests")
+
 passed = 0
+os.chdir("./tests")
 for i in range(1, NUM_TESTCASES + 1):
     in_filename = "set{i}_process.in".format(i=i)
     out_filename = "set{i}_processes.out".format(i=i)
-    copy(in_filename, "processes.in")
+
     print("Running {test}:".format(test=in_filename))
+    copy(in_filename, "processes.in")
     with open(os.devnull, 'w') as devnull:
-        if call("../bin/scheduler", stdout=devnull, stderr=devnull) != 0:
-            print("✖ Runtime Error")
-            continue
-    if cmp(out_filename, "processes.out"):
-        print("✓ Passed")
-        passed += 1
+        result = run("../bin/scheduler", stdout=devnull, stderr=devnull)
+    if result.returncode != 0:
+        print("✖ | Exit failure")
+    elif not cmp(out_filename, "processes.out"):
+        print("✖ | Output mismatch")
     else:
-        print("✖ Output Mismatch")
+        print("✓ | Passed")
+        passed += 1
+try:
     os.remove("processes.in")
     os.remove("processes.out")
-print("----------------------------------------------------------------------")
+except FileNotFoundError:
+    pass
 
-print("TESTS PASSED = {p} / {t}".format(p=passed, t=NUM_TESTCASES))
+print("\nTests Passed = {p} / {t}".format(p=passed, t=NUM_TESTCASES))
+print("----------------------------------------------------------------------")
 
 sys.exit(0)
