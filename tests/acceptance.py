@@ -45,6 +45,9 @@ for i in range(1, NUM_TESTCASES + 1):
         passed += 1
 try:
     os.remove("processes.in")
+except FileNotFoundError:
+    pass
+try:
     os.remove("processes.out")
 except FileNotFoundError:
     pass
