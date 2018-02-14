@@ -43,14 +43,13 @@ for i in range(1, NUM_TESTCASES + 1):
     else:
         print("✓ | Passed")
         passed += 1
-try:
-    os.remove("processes.in")
-except FileNotFoundError:
-    pass
-try:
-    os.remove("processes.out")
-except FileNotFoundError:
-    pass
+
+cleanup = ["processes.in", "processes.out"]
+for filename in cleanup:
+    try:
+        os.remove(filename);
+    except FileNotFoundError:
+        pass
 
 print("\nTests Passed = {p} / {t}".format(p=passed, t=NUM_TESTCASES))
 print("----------------------------------------------------------------------")
