@@ -160,7 +160,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 		if(min >= jobcount){
 			Job *job = &jobs[min];
 			job->burst--;
-			&jobs[min] = job;
+			jobs[min] = job;
 			min = 10000;
 	}
 	}
