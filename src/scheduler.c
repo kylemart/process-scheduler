@@ -18,10 +18,7 @@ typedef struct Job
 static Job *jobs_new(ProcessList *processes)
 {
     size_t n = processlist_size(processes);
-    Job *jobs = malloc(n * sizeof(Job));
-    if (!jobs) {
-        error_abort(ERROR_MSG_MALLOC);
-    }
+    Job *jobs = amalloc(n * sizeof(Job));
     for (size_t i = 0; i < n; ++i) {
         Process *p = processlist_get(processes, i);
         jobs[i] = (Job) {

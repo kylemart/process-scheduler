@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void error_print(const char *format, va_list args)
+#define ERROR_MSG_MEMORY ("memory allocation failure")
+
+static void error_print(const char *format, va_list args)
 {
     fprintf(stderr, "error: ");
     vfprintf(stderr, format, args);
@@ -27,4 +29,22 @@ void error_abort(const char *format, ...)
     va_end(args);
 
     abort();
+}
+
+void *amalloc(size_t size)
+{
+    void *ptr = malloc(size);
+    if (!ptr) {
+        error_abort(ERROR_MSG_MEMORY);
+    }
+    return ptr;
+}
+
+void *acalloc(size_t n, size_t size)
+{
+    void *ptr = calloc(n, size);
+    if (!ptr) {
+        error_abort(ERROR_MSG_MEMORY);
+    }
+    return ptr;
 }

@@ -59,10 +59,7 @@ bool config_load(Config **dest, FILE *cf)
         return false;
     }
 
-    *dest = malloc(sizeof(Config));
-    if (!*dest) {
-        error_abort(ERROR_MSG_MALLOC);
-    }
+    *dest = amalloc(sizeof(Config));
     memcpy(*dest, &config, sizeof(Config));
 
     return true;
