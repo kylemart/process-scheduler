@@ -156,9 +156,12 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 			}
     		fprintf(out, "\n%s: %u\n", job->name, job->burst);
 		}
-		Job *job = &jobs[min];
-		job->burst--;
-		min = 10000;
+		//Make sure something has arrived
+		if(min >= jobcount){
+			Job *job = &jobs[min];
+			job->burst--;
+			min = 10000;
+	}
 	}
     
     
