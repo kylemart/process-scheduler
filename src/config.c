@@ -36,23 +36,23 @@ ProcessList *config_processes(Config *config)
 
 bool config_load(Config **dest, FILE *cf)
 {
-    Config cfg = { 0, 0, SCHEDULER_UNDEF, NULL };
-    size_t cnt = 0;
+    Config config = { 0, 0, SCHEDULER_UNDEF, NULL };
+    size_t n = 0;
     lineno = 1;
 
-    if (!read_processcount(&cnt, cf)) {
+    if (!read_processcount(&n, cf)) {
         return false;
     }
-    if (!read_runfor(&cfg.runfor, cf)) {
+    if (!read_runfor(&config.runfor, cf)) {
         return false;
     }
-    if (!read_use(&cfg.use, cf)) {
+    if (!read_use(&config.use, cf)) {
         return false;
     }
-    if (!read_quantum(&cfg.quantum, cf) && cfg.use == SCHEDULER_RR) {
+    if (!read_quantum(&config.quantum, cf) && config.use == SCHEDULER_RR) {
         return false;
     }
-    if (cnt > 0 && !read_processes(&cfg.processes, cnt, cf)) {
+    if (n > 0 && !read_processes(&config.processes, n, cf)) {
         return false;
     }
     if (!read_end(cf)) {
@@ -63,7 +63,7 @@ bool config_load(Config **dest, FILE *cf)
     if (!*dest) {
         error_abort(ERROR_MSG_MALLOC);
     }
-    memcpy(*dest, &cfg, sizeof(Config));
+    memcpy(*dest, &config, sizeof(Config));
 
     return true;
 }
