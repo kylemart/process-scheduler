@@ -15,7 +15,7 @@ filepath `./bin/scheduler`.
 
 ## Testing
 
-Testing can be done by running `python tests/acceptance.py` in the root of the
+Testing can be done by running `python3 tests/acceptance.py` in the root of the
 project folder. A report containing the number of passed acceptance tests
 will be printed to stdout. Should compilation of the scheduler fail, the script
 will notify the user.

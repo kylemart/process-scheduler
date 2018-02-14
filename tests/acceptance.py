@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 # Author: Kyle Martinez
 
 from filecmp import cmp
