@@ -49,7 +49,7 @@ bool config_load(Config **dest, FILE *cf)
     if (!read_use(&config.use, cf)) {
         return false;
     }
-    if (!read_quantum(&config.quantum, cf) && config.use == SCHEDULER_RR) {
+    if (config.use == SCHEDULER_RR && !read_quantum(&config.quantum, cf)) {
         return false;
     }
     if (n > 0 && !read_processes(&config.processes, n, cf)) {
