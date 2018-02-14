@@ -162,6 +162,9 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 			}
 			//fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
 			jobs[min].burst = jobs[min].burst-1;
+			if(jobs[min].burst == 0){
+				fprintf(out, "Time %u: %s Finished\n", tick, jobs[min].name);
+			}
 			prev = min;
 			min = 10000;
 	}	
