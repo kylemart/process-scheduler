@@ -134,6 +134,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     // Make a for loop that goes one at a time through each tick till we run out of time
     Job *jobs = jobs_new(processes);
     uint min = 10000;
+    uint prev = 10000;
    for(uint tick = 0; tick < runfor; tick++){
     	// Here I am looping through each process to check its burst time
     	// And printing it to the output file to test
@@ -156,12 +157,17 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 		}
 		//Make sure something has arrived
 		if(min <= jobcount){
-			fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
+			if(min != prev){
+				fprintf(out, "Time %u: %s selected(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
+			}
+			//fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
 			jobs[min].burst = jobs[min].burst-1;
+			prev = min;
 			min = 10000;
 	}	
 	else{
 			fprintf(out, "Time %u: IDLE\n", tick);
+			prev = min;
 	}
 	}
     fprintf(out,"Finished at time %u\n\n", runfor);
@@ -211,14 +217,13 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
             }
             else if (timeleft == 0) {
                 jobq_lshift(ready);
-                selected = NULL;
             }
         }
 
         if (jobq_empty(ready)) {
             fprintf(out, "Time %u: IDLE\n", tick);
         }
-        else if (!selected) {
+        else {
             selected = jobq_peek(ready);
             timeleft = min(selected->burst, quantum);
             fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
