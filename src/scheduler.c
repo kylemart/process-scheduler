@@ -42,77 +42,6 @@ static void jobs_destroy(Job *jobs)
 
 // #endregion ------------------------------------------------------------------
 
-// #region JobQueue ------------------------------------------------------------
-
-typedef struct JobQueue
-{
-    size_t capacity;
-    size_t size;
-    size_t start;
-    Job **jobs;
-} JobQueue;
-
-static JobQueue *jobq_new(size_t capacity)
-{
-    JobQueue *q = malloc(sizeof(JobQueue));
-    if (!q) {
-        error_abort(ERROR_MSG_MALLOC);
-    }
-
-    q->capacity = capacity;
-    q->size = 0;
-    q->start = 0;
-    q->jobs = calloc(capacity, sizeof(Job *));
-
-    return q;
-}
-
-static void jobq_destroy(JobQueue *q)
-{
-    free(q);
-}
-
-static bool jobq_empty(JobQueue *q)
-{
-    return q->size == 0;
-}
-
-static Job *jobq_peek(JobQueue *q)
-{
-    if (jobq_empty(q)) {
-        return NULL;
-    }
-    return q->jobs[q->start];
-}
-
-static Job *jobq_remove(JobQueue *q)
-{
-    Job *removed = q->jobs[q->start];
-    q->jobs[q->start] = NULL;
-    q->start = (q->start + 1) % q->capacity;
-    --q->size;
-    return removed;
-}
-
-static bool jobq_add(JobQueue *q, Job *job)
-{
-    if (q->size == q->capacity) {
-        return false;
-    }
-    size_t index = (q->start + q->size) % q->capacity;
-    q->jobs[index] = job;
-    ++q->size;
-    return true;
-}
-
-static void jobq_lshift(JobQueue *q)
-{
-    Job *removed = jobq_remove(q);
-    jobq_add(q, removed);
-}
-
-// #endregion ------------------------------------------------------------------
-
 // #region Scheduling Algorithms -----------------------------------------------
 
 void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
@@ -135,8 +64,10 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
 
     Job *jobs = jobs_new(processes);
 
-    JobQueue *ready = jobq_new(jobcount);
+    size_t started = 0;
+    size_t finished = 0;
     Job *selected = NULL;
+    ssize_t selectedindex = -1;
     uint timeleft = 0;
 
     for (uint tick = 0; tick < runfor; ++tick) {
@@ -149,8 +80,8 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
                 ++job->turnaround;
             }
             else if (job->start == tick) {
-                jobq_add(ready, job);
                 fprintf(out, "Time %u: %s arrived\n", tick, job->name);
+                ++started;
             }
         }
 
@@ -158,21 +89,28 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
             --timeleft;
             --selected->burst;
             if (selected->burst == 0) {
-                Job *done = jobq_remove(ready);
-                fprintf(out, "Time %u: %s finished\n", tick, done->name);
+                fprintf(out, "Time %u: %s finished\n", tick, selected->name);
                 selected = NULL;
+                ++finished;
             }
             else if (timeleft == 0) {
-                jobq_lshift(ready);
                 selected = NULL;
             }
         }
 
-        if (jobq_empty(ready)) {
+        if (started == finished) {
             fprintf(out, "Time %u: IDLE\n", tick);
         }
         else if (!selected) {
-            selected = jobq_peek(ready);
+            for (size_t offset = 1; offset <= jobcount; ++offset) {
+                size_t index = (selectedindex + offset) % jobcount;
+                Job *job = &jobs[index];
+                if (job->burst > 0 && job->start <= tick) {
+                    selected = job;
+                    selectedindex = index;
+                    break;
+                }
+            }
             timeleft = min(selected->burst, quantum);
             fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
                 selected->name, selected->burst);
@@ -192,7 +130,6 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
     }
 
     jobs_destroy(jobs);
-    jobq_destroy(ready);
 }
 
 // #endregion ------------------------------------------------------------------
