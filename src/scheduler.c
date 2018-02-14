@@ -157,7 +157,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 			}
     		
 		}
-		fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
+		//fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
 		//Make sure something has arrived
 		if(min >= jobcount){
 			//Job *job = &jobs[min];
@@ -165,8 +165,9 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 			fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
 			jobs[min].burst = jobs[min].burst-1;
 			min = 10000;
-	}	else{
-		fprintf(out, "Time %u: IDLE\n", tick);
+	}	
+	else{
+			fprintf(out, "Time %u: IDLE\n", tick);
 	}
 	}
     
