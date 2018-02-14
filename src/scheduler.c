@@ -142,7 +142,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     Job *jobs = jobs_new(processes);
     uint min = 10000;
    for(uint tick = 0; tick < runfor; tick++){
-   		fprintf(out, "Time %u: ", tick);
+   	//	fprintf(out, "Time %u: ", tick);
     	// Here I am looping through each process to check its burst time
     	// And printing it to the output file to test
     	for(size_t loop = 0; loop <jobcount ; loop++){
@@ -151,16 +151,18 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     		if(min > job->burst && job->start <= tick){
     			min = loop;
 			}
+			fprintf(out, "%s: %u\n", jobs[min].name, jobs[min].burst);
 			if(job->start == tick){
-				fprintf(out, "%s Has Arrived\n", job->name);
+				fprintf(out, "Time %u: %s Has Arrived\n",tick, job->name);
 			}
-    		fprintf(out, "\n%s: %u\n", job->name, job->burst);
+    		
 		}
+		fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
 		//Make sure something has arrived
 		if(min >= jobcount){
-			Job *job = &jobs[min];
-			job->burst--;
-			jobs[min].burst = job->burst;
+			//Job *job = &jobs[min];
+			//job->burst--;
+			jobs[min].burst = jobs[min].burst-1;
 			min = 10000;
 	}
 	}
