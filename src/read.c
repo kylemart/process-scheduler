@@ -3,9 +3,6 @@
 #include <read.h>
 #include <process.h>
 
-#define END     ("end")
-#define COMMENT ('#')
-
 ulong lineno;
 
 typedef struct
@@ -17,7 +14,7 @@ typedef struct
 static void preprocess(char *line, size_t length)
 {
     line[length - 1] = '\0';
-    char *cmtpos = memchr(line, COMMENT, length);
+    char *cmtpos = memchr(line, '#', length);
     if (cmtpos) {
         *cmtpos = '\0';
     }
@@ -139,7 +136,7 @@ bool read_end(FILE *stream)
     ScanFormat fmt = { "%4s", 1 };
     char line[5];
     if (scanf_line(stream, &fmt, line)) {
-        return strcmp(line, END) == 0;
+        return strcmp(line, "end") == 0;
     }
     return false;
 }
