@@ -122,7 +122,21 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 
 void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 {
-    // ...
+    // Im so rusty at C, this'll be fun
+    // Im gonna borrow some of your code Kyle ;)
+    size_t jobcount = processlist_size(processes);
+	fprintf(out, "%zu processes\n", jobcount);
+	
+	// I modified this one just a little bit though
+    fputs("Using Shortest Job First(Preemptive)\n", out);
+    
+    // The following Comments are a reference guide to help me remember what everything is
+    // ProcessList seems to be an array of processes
+    // Which is part of a struct which holds all of the information that I should need
+    // The struct is made in config.c
+    
+    
+    
 }
 
 void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
