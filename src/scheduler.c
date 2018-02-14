@@ -134,6 +134,21 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     // ProcessList seems to be an array of processes
     // Which is part of a struct which holds all of the information that I should need
     // The struct is made in config.c
+    // toschedulertype is what picks what scheduler runs
+    // Process is a struct that has the process name(Number im assuming) and the burst and arrival time
+    
+    // Starting the actual SJF code now
+    // Make a for loop that goes one at a time through each tick till we run out of time
+    for(uint tick = 0; tick < runfor; tick++){
+    	// Here I am looping through each process to check its burst time
+    	// And printing it to the output file to test
+    	for(uint loop = jobcount-1; loop >=0 ; tick--){
+    		// Read its info and print it
+    		int will_print = Process[loop]->burst;
+    		char* name = Process[loop]->name;
+    		fprintf(out, "%s: %d", name, will_print);
+		}
+	}
     
     
     
