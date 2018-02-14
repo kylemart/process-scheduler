@@ -1,3 +1,4 @@
+#include <ctype.h>
 #include <stdarg.h>
 #include <string.h>
 #include <read.h>
@@ -11,24 +12,38 @@ typedef struct
     const size_t arg_count;
 } Format;
 
-static void preprocess(char *line, size_t length)
+static void strip_comment(char *str)
 {
-    line[length - 1] = '\0';
-    char *cmtpos = memchr(line, '#', length);
+    char *cmtpos = strchr(str, '#');
     if (cmtpos) {
         *cmtpos = '\0';
     }
 }
 
+static bool is_whitespace(const char *str)
+{
+    while (*str) {
+        if (!isspace(*str)) {
+            return false;
+        }
+        ++str;
+    }
+    ++lineno;
+    return true;
+}
+
 static bool get_line_str(char **line, FILE *stream)
 {
-    size_t size;
-    ssize_t length = getline(line, &size, stream);
-    if (length >= 0) {
-        preprocess(*line, length);
-        return true;
+    do {
+        size_t size;
+        ssize_t length = getline(line, &size, stream);
+        if (length == -1) {
+            return false;
+        }
+        strip_comment(*line);
     }
-    return false;
+    while (is_whitespace(*line));
+    return true;
 }
 
 static bool scanf_line(FILE *stream, Format *fmt, ...)
