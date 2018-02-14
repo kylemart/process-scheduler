@@ -143,7 +143,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
    // for(uint tick = 0; tick < runfor; tick++){
     	// Here I am looping through each process to check its burst time
     	// And printing it to the output file to test
-    	for(size_t loop = (jobcount-1); loop >= 0 ; loop--){
+    	for(size_t loop = 0; loop <jobcount ; loop++){
     		// Read its info and print it
     		Job *job = &jobs[loop];
     		fprintf(out, "%s: %u", job->name, job->burst);
