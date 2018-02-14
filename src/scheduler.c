@@ -85,13 +85,12 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
         if (selected) {
             --timeleft;
             --selected->burst;
+            if (timeleft == 0) {
+                selected = NULL;
+            }
             if (selected->burst == 0) {
                 fprintf(out, "Time %u: %s finished\n", tick, selected->name);
-                selected = NULL;
                 ++finished;
-            }
-            else if (timeleft == 0) {
-                selected = NULL;
             }
         }
 
