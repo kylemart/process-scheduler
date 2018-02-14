@@ -41,6 +41,6 @@ for i in range(1, NUM_TESTCASES + 1):
     os.remove("processes.in")
     os.remove("processes.out")
 print("----------------------------------------------------------------------")
-print("Tests Passed = {passed}".format(passed=passed))
+print("TESTS PASSED = {p} / {t}".format(p=passed, t=NUM_TESTCASES))
 print("----------------------------------------------------------------------")
 sys.exit(0)
