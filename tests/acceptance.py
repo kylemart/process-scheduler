@@ -6,6 +6,7 @@ from filecmp import cmp
 from subprocess import call
 from shutil import copy
 import os
+import sys
 
 NUM_TESTCASES = 4
 
@@ -14,7 +15,7 @@ print("COMPILING")
 print("----------------------------------------------------------------------")
 if call("make") != 0:
     print("✖ Failure! Try manually building to inspect the problem.")
-    exit()
+    sys.exit(1)
 else:
     print("✓ Success!")
 
@@ -43,3 +44,4 @@ for i in range(1, NUM_TESTCASES + 1):
 print("----------------------------------------------------------------------")
 print("Tests Passed = {passed}".format(passed=passed))
 print("----------------------------------------------------------------------")
+sys.exit(0)
