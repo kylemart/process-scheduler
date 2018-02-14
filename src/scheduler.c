@@ -161,7 +161,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 		}
 		//fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
 		//Make sure something has arrived
-		if(min >= jobcount){
+		if(min <= jobcount){
 			//Job *job = &jobs[min];
 			//job->burst--;
 			fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
