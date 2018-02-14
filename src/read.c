@@ -32,7 +32,7 @@ static bool is_whitespace(const char *str)
     return true;
 }
 
-static bool get_line(char **line, FILE *stream)
+static bool get_next_line(char **line, FILE *stream)
 {
     do {
         size_t size;
@@ -49,7 +49,7 @@ static bool get_line(char **line, FILE *stream)
 static bool scanf_line(FILE *stream, Format *fmt, ...)
 {
     char *line = NULL;
-    if (!get_line(&line, stream)) {
+    if (!get_next_line(&line, stream)) {
         return false;
     }
     va_list arg;
