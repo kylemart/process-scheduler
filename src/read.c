@@ -9,7 +9,7 @@ typedef struct
 {
     const char * const string;
     const size_t arg_count;
-} ScanFormat;
+} Format;
 
 static void preprocess(char *line, size_t length)
 {
@@ -31,7 +31,7 @@ static bool get_line_str(char **line, FILE *stream)
     return false;
 }
 
-static bool scanf_line(FILE *stream, ScanFormat *fmt, ...)
+static bool scanf_line(FILE *stream, Format *fmt, ...)
 {
     char *line = NULL;
     if (!get_line_str(&line, stream)) {
@@ -46,7 +46,7 @@ static bool scanf_line(FILE *stream, ScanFormat *fmt, ...)
 
 bool read_processcount(size_t *result, FILE *stream)
 {
-    ScanFormat fmt = { "processcount %zu", 1 };
+    Format fmt = { "processcount %zu", 1 };
     if (scanf_line(stream, &fmt, result)) {
         ++lineno;
         return true;
@@ -56,7 +56,7 @@ bool read_processcount(size_t *result, FILE *stream)
 
 bool read_runfor(uint *result, FILE *stream)
 {
-    ScanFormat fmt = { "runfor %u", 1 };
+    Format fmt = { "runfor %u", 1 };
     if (scanf_line(stream, &fmt, result)) {
         ++lineno;
         return true;
@@ -80,7 +80,7 @@ static SchedulerType to_schedulertype(const char *str)
 
 bool read_use(SchedulerType *result, FILE *stream)
 {
-    ScanFormat fmt = { "use %5s", 1 };
+    Format fmt = { "use %5s", 1 };
     char use[6];
     if (scanf_line(stream, &fmt, &use)) {
         *result = to_schedulertype(use);
@@ -94,7 +94,7 @@ bool read_use(SchedulerType *result, FILE *stream)
 
 bool read_quantum(uint *result, FILE *stream)
 {
-    ScanFormat fmt = { "quantum %u", 1 };
+    Format fmt = { "quantum %u", 1 };
     if (scanf_line(stream, &fmt, result)) {
         ++lineno;
         return true;
@@ -104,7 +104,7 @@ bool read_quantum(uint *result, FILE *stream)
 
 static bool read_process(Process **result, FILE *stream)
 {
-    ScanFormat fmt = { "process name %20s arrival %u burst %u", 3 };
+    Format fmt = { "process name %20s arrival %u burst %u", 3 };
     char name[21];
     uint arrival = 0;
     uint burst = 0;
@@ -133,7 +133,7 @@ bool read_processes(ProcessList **result, size_t n, FILE *stream)
 
 bool read_end(FILE *stream)
 {
-    ScanFormat fmt = { "%4s", 1 };
+    Format fmt = { "%4s", 1 };
     char line[5];
     if (scanf_line(stream, &fmt, line)) {
         return strcmp(line, "end") == 0;
