@@ -147,8 +147,8 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     		// Read its info and print it
     		Job *job = &jobs[loop];
     		int will_print = job->burst;
-    		char* namey = job->name;
-    		fprintf(out, "%s: %d", namey, will_print);
+    		
+    		fprintf(out, "%s: %d", job->name, will_print);
 		}
 	}
     
