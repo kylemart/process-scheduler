@@ -13,6 +13,13 @@ To run, set your working directory to the root of the project folder then
 execute `make`. This will generate an executable binary with the
 filepath `./bin/scheduler`.
 
+## Testing
+
+Testing can be done by running `python tests/acceptance.py` in the root of the
+project folder. A report containing the number of passed acceptance tests
+will be printed to stdout. Should compilation of the scheduler fail, the script
+will notify the user.
+
 ## Input Format
 
 The scheduler program requires that a file, called `processes.in`, be present
