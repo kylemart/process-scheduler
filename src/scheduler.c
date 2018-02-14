@@ -148,14 +148,17 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     	for(size_t loop = 0; loop <jobcount ; loop++){
     		// Read its info and print it
     		Job *job = &jobs[loop];
-    		if(min > job->burst){
+    		if(min > job->burst && job->start >= tick){
     			min = loop;
 			}
 			if(job->start == tick){
 				fprintf(out, "%s Has Arrived\n", job->name);
 			}
-    		fprintf(out, "%s: %u\n", job->name, job->burst);
+    		fprintf(out, "\n%s: %u\n", job->name, job->burst);
 		}
+		Job *job = &jobs[min];
+		job->burst--;
+		
 	}
     
     
