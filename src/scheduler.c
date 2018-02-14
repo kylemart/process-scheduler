@@ -130,19 +130,11 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 	// I modified this one just a little bit though
     fputs("Using Shortest Job First(Preemptive)\n", out);
     
-    // The following Comments are a reference guide to help me remember what everything is
-    // ProcessList seems to be an array of processes
-    // Which is part of a struct which holds all of the information that I should need
-    // The struct is made in config.c
-    // toschedulertype is what picks what scheduler runs
-    // Process is a struct that has the process name(Number im assuming) and the burst and arrival time
-    
     // Starting the actual SJF code now
     // Make a for loop that goes one at a time through each tick till we run out of time
     Job *jobs = jobs_new(processes);
     uint min = 10000;
    for(uint tick = 0; tick < runfor; tick++){
-   	//	fprintf(out, "Time %u: ", tick);
     	// Here I am looping through each process to check its burst time
     	// And printing it to the output file to test
     	for(size_t loop = 0; loop <jobcount ; loop++){
@@ -150,20 +142,20 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     		Job *job = &jobs[loop];
     		if(min > job->burst && job->start <= tick && job->burst != 0){
     			min = loop;
-    			//fprintf(out, "Min1: %u\n", min);
 			}
-			//fprintf(out, "Min2: %u\n", min);
-			//fprintf(out, "%s: %u\n", jobs[min].name, jobs[min].burst);
 			if(job->start == tick){
 				fprintf(out, "Time %u: %s Has Arrived\n",tick, job->name);
 			}
+			if(job->start<=tick && job->burst!=0){
+				jobs[loop].turnaround ++;
+				if(min != loop){
+					jobs[loop].wait ++;
+				}
+			}
     		
 		}
-		//fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
 		//Make sure something has arrived
 		if(min <= jobcount){
-			//Job *job = &jobs[min];
-			//job->burst--;
 			fprintf(out, "Time %u: %s is running(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
 			jobs[min].burst = jobs[min].burst-1;
 			min = 10000;
@@ -173,6 +165,9 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 	}
 	}
     fprintf(out,"Finished at time %u\n\n", runfor);
+    for(size_t loop = 0; loop <jobcount ; loop++){
+    	fprintf(out, "%s wait %u turnaround %u\n", jobs[loop].name, jobs[loop].wait,jobs[loop].turnaround);
+	}
     
     
 }
