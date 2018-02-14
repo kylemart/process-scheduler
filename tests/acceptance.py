@@ -30,9 +30,8 @@ for i in range(1, NUM_TESTCASES + 1):
     copy(in_filename, "processes.in")
     print("Running {test}:".format(test=in_filename))
     with open(os.devnull, 'w') as devnull:
-        if call("../bin/scheduler", shell=True,
-                stdout=devnull, stderr=devnull) != 0:
-            print("✖ Execution Failure")
+        if call("../bin/scheduler", stdout=devnull, stderr=devnull) != 0:
+            print("✖ Runtime Error")
             continue
     if cmp(out_filename, "processes.out"):
         print("✓ Passed")
