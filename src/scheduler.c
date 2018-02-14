@@ -164,13 +164,14 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
             }
             else if (timeleft == 0) {
                 jobq_lshift(ready);
+                selected = NULL;
             }
         }
 
         if (jobq_empty(ready)) {
             fprintf(out, "Time %u: IDLE\n", tick);
         }
-        else {
+        else if (!selected) {
             selected = jobq_peek(ready);
             timeleft = min(selected->burst, quantum);
             fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
