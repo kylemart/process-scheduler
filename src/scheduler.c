@@ -98,7 +98,7 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
         if (started == finished) {
             fprintf(out, "Time %u: IDLE\n", tick);
         }
-        else if (!selected) {
+        else {
             for (size_t offset = 1; offset <= jobcount; ++offset) {
                 size_t index = (selectedindex + offset) % jobcount;
                 Job *job = &jobs[index];
