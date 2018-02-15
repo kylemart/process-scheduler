@@ -70,29 +70,29 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
     for (uint tick = 0; tick < runfor; ++tick) {
         for (size_t i = 0; i < jobcount; ++i) {
             Job *job = &jobs[i];
-            if (job->start < tick && job->burst > 0) {
+            if (job->start == tick) {
+                fprintf(out, "Time %u: %s arrived\n", tick, job->name);
+                ++started;
+            }
+            else if (job->start < tick && job->burst > 0) {
                 if (job != selected) {
                     ++job->wait;
                 }
                 ++job->turnaround;
-            }
-            else if (job->start == tick) {
-                fprintf(out, "Time %u: %s arrived\n", tick, job->name);
-                ++started;
             }
         }
 
         if (selected) {
             --timeleft;
             --selected->burst;
+            if (timeleft > 0) {
+                continue;
+            }
             if (selected->burst == 0) {
                 fprintf(out, "Time %u: %s finished\n", tick, selected->name);
-                selected = NULL;
                 ++finished;
             }
-            else if (timeleft == 0) {
-                selected = NULL;
-            }
+            selected = NULL;
         }
 
         if (started == finished) {
