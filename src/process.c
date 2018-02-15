@@ -13,15 +13,8 @@ struct Process
 
 Process *process_new(char *name, uint arrival, uint burst)
 {
-    Process *p = malloc(sizeof(Process));
-    if (!p) {
-        error_abort(ERROR_MSG_MALLOC);
-    }
-    p->name = malloc(strlen(name) + 1);
-    if (!p->name) {
-        free(p);
-        error_abort(ERROR_MSG_MALLOC);
-    }
+    Process *p = amalloc(sizeof(Process));
+    p->name = amalloc(strlen(name) + 1);
     strcpy(p->name, name);
     p->arrival = arrival;
     p->burst = burst;
@@ -65,15 +58,8 @@ struct ProcessList
 
 ProcessList *processlist_new(size_t capacity)
 {
-    ProcessList *list = malloc(sizeof(ProcessList));
-    if (!list) {
-        error_abort(ERROR_MSG_MALLOC);
-    }
-    list->items = calloc(capacity, sizeof(Process *));
-    if (!list->items) {
-        free(list);
-        error_abort(ERROR_MSG_MALLOC);
-    }
+    ProcessList *list = amalloc(sizeof(ProcessList));
+    list->items = acalloc(capacity, sizeof(Process *));
     list->capacity = capacity;
     list->size = 0;
     return list;

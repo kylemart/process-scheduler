@@ -1,7 +1,7 @@
 #ifndef ERROR_H
 #define ERROR_H
 
-#define ERROR_MSG_MALLOC ("memory allocation failure")
+#include <stdlib.h>
 
 /**
  * Prints an error message to stderr and exits using the EXIT_FAILURE flag.
@@ -23,5 +23,22 @@ void error_exit(const char *format, ...);
  * @param VARARGS Arguments to inline in the formatted message.
  */
 void error_abort(const char *format, ...);
+
+/**
+ * A wrapper for malloc that calls error_abort() should it fail.
+ *
+ * @param  size The number of bytes to allocate
+ * @return      A pointer to the created memory
+ */
+void *amalloc(size_t size);
+
+/**
+ * A wrapper for calloc that calls error_abort() should it fail.
+ *
+ * @param  n    The number of items to allocate space for
+ * @param  size The number of bytes each item consumes
+ * @return      A pointer to the created memory
+ */
+void *acalloc(size_t n, size_t size);
 
 #endif
