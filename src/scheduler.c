@@ -145,7 +145,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     			min = loop;
 			}
 			if(job->start == tick){
-				fprintf(out, "Time %u: %s Has Arrived\n",tick, job->name);
+				fprintf(out, "Time %u: %s arrived\n",tick, job->name);
 			}
 			if(job->start<=tick && job->burst!=0){
 				jobs[loop].turnaround ++;
