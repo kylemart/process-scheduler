@@ -92,10 +92,10 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
                 fprintf(out, "Time %u: %s finished\n", tick, selected->name);
                 ++finished;
             }
-            selected = NULL;
         }
 
         if (started == finished) {
+            selected = NULL;
             fprintf(out, "Time %u: IDLE\n", tick);
         }
         else {
