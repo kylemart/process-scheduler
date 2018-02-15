@@ -128,7 +128,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 	fprintf(out, "%zu processes\n", jobcount);
 	
 	// I modified this one just a little bit though
-    fputs("Using Shortest Job First(Preemptive)\n\n", out);
+    fputs("Using Shortest Job First (Pre)\n\n", out);
     
     // Starting the actual SJF code now
     // Make a for loop that goes one at a time through each tick till we run out of time
@@ -158,11 +158,11 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 		//Make sure something has arrived
 		if(min <= jobcount){
 			if(min != prev){
-				fprintf(out, "Time %u: %s selected(Burst: %u)\n", tick, jobs[min].name, jobs[min].burst);
+				fprintf(out, "Time %u: %s selected (burst %u)\n", tick, jobs[min].name, jobs[min].burst);
 			}
 			jobs[min].burst = jobs[min].burst-1;
 			if(jobs[min].burst == 0){
-				fprintf(out, "Time %u: %s Finished\n", tick+1, jobs[min].name);
+				fprintf(out, "Time %u: %s finished\n", tick+1, jobs[min].name);
 			}
 			prev = min;
 			min = 10000;
