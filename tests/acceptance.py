@@ -8,7 +8,7 @@ from shutil import copy
 import os
 import sys
 
-NUM_TESTCASES = 4
+NUM_TESTCASES = 5
 
 print("======================================================================")
 print("COMPILING")
