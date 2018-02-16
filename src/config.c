@@ -49,7 +49,7 @@ bool config_load(Config **dest, FILE *cf)
         try(read_quantum(&config.quantum, cf));
     }
     if (n > 0) {
-        try(read_processes(&config.processes, n, cf))
+        try(read_processes(&config.processes, n, cf));
     }
     try(read_end(cf));
 
