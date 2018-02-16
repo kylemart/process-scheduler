@@ -61,7 +61,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     Job *jobs = jobs_new(processes);
     uint min = 2147483646;
     uint prev = 2147483646;
-    uint loop_hold = 0;
+    uint loop_hold = 2147483646;
     for (uint tick = 0; tick < runfor; tick++){
     	// Here I am looping through each process to check its burst time
     	// And printing it to the output file to test
@@ -86,7 +86,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 		//Make sure something has arrived
 		if (loop_hold <= jobcount){
 			if (loop_hold != prev){
-				fprintf(out, "Time %u: %s selected (burst %u)\n", tick, jobs[min].name, jobs[min].burst);
+				fprintf(out, "Time %u: %s selected (burst %u)\n", tick, jobs[loop_hold].name, jobs[loop_hold].burst);
 			}
 			jobs[loop_hold].burst = jobs[loop_hold].burst-1;
             if (jobs[loop_hold].burst == 0){
@@ -94,11 +94,11 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 			}
 			prev = loop_hold;
 			min = 2147483646;
-	}	
-	else {
+		}	
+		else {
 		    fprintf (out, "Time %u: IDLE\n", tick);
-			prev = min;
-	}
+			prev = loop_hold;
+		}
 	}
     fprintf (out,"Finished at time %u\n\n", runfor);
     for (size_t loop = 0; loop <jobcount ; loop++){
