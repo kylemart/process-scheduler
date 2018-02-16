@@ -43,7 +43,82 @@ static void jobs_destroy(Job *jobs)
 
 void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 {
-    // ...
+    size_t jobcount = processlist_size(processes);
+
+    fprintf(out, "%zu processes\n", jobcount);
+    fputs("Using First Come First Served\n\n", out);
+
+    Job *jobs = jobs_new(processes);
+
+    Job *current = NULL;
+    uint timeleft = 0;
+    int bursting = 0;//used to print at appropriate time
+    int start = 0;
+    int finish = 0;
+    ssize_t index = -1;
+    int time=0; 
+
+    for(uint tick = 0; tick <= runfor; ++tick)
+    {
+        for(size_t i = 0; i < jobcount; ++i)
+        {
+	    Job *job = &jobs[i];
+	    if(job->start == tick)
+	    {
+		fprintf(out, "Time %u: %s arrived\n", tick, job->name);
+		start++;
+	    }
+	    else if(job->start <= tick && job->burst > 0)
+	    {
+		if (job != current) 
+                {
+                    ++job->wait;
+                }
+                ++job->turnaround;
+	    }
+        }
+        if(current)
+        {
+            --timeleft;
+            --current->burst;
+	    ++bursting;
+	    ++time;
+	    if(current->burst == 0)
+	    {
+		fprintf(out, "Time %u: %s finished\n", tick, current->name);
+		bursting = 0;
+		finish++;
+	    }
+	    else
+		current = NULL;
+        }
+        if(start == finish)
+		;
+//            fprintf(out, "time %u: IDLE\n", tick);
+	else 
+	{
+	    for(size_t j = 0; j < jobcount; ++j)
+	    {
+		Job *job = &jobs[j];
+		if(job->burst > 0)
+		{
+		    current = job;
+		    break;
+		}
+	    }
+	    timeleft = min(current->burst, 0);
+	    if(bursting == 0)
+	        fprintf(out, "Time %u: %s selected (burst %u)\n", tick, current->name, current->burst);
+	}
+	
+    }
+    fprintf(out, "Finished at time %u\n\n", time - 1);
+    for(size_t i = 0; i < jobcount; i++)
+    {
+        Job *job = &jobs[i];
+            fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait, job->turnaround);
+    }
+    jobs_destroy(jobs);
 }
 
 void run_sjf(FILE *out, uint runfor, ProcessList *processes)
