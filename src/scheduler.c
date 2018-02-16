@@ -180,18 +180,18 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 
     for (uint tick = 0; tick < runfor; ++tick) {
         for (size_t i = 0; i < jobcount; ++i) {
-    		Job *job = &jobs[i];
+            Job *job = &jobs[i];
             if (job->start > tick || job->burst == 0) {
                 continue;
             }
-    		if (min > job->burst) {
-    			min = job->burst;
-    			selectedindex = i;
-			}
-			if (job->start == tick) {
-				fprintf(out, "Time %u: %s arrived\n", tick, job->name);
-			}
-		}
+            if (min > job->burst) {
+                min = job->burst;
+                selectedindex = i;
+            }
+            if (job->start == tick) {
+                fprintf(out, "Time %u: %s arrived\n", tick, job->name);
+            }
+        }
 
         for (size_t i = 0; i < jobcount; ++i) {
             Job *job = &jobs[i];
@@ -199,38 +199,38 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
                 continue;
             }
             ++job->turnaround;
-			if (selectedindex != i) {
-				++job->wait;
-			}
+            if (selectedindex != i) {
+                ++job->wait;
+            }
         }
 
-		if (selectedindex >= 0) {
+        if (selectedindex >= 0) {
             Job *selected = &jobs[selectedindex];
             if (selectedindex != previous){
-				fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
+                fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
                     selected->name, selected->burst);
-			}
-			--selected->burst;
+            }
+            --selected->burst;
             if (selected->burst == 0) {
-				fprintf(out, "Time %u: %s finished\n", tick + 1,
+                fprintf(out, "Time %u: %s finished\n", tick + 1,
                     selected->name);
-			}
-			previous = selectedindex;
-			min = UINT_MAX;
-			selectedindex = -1;
-		}
-		else {
-		    fprintf (out, "Time %u: IDLE\n", tick);
-			previous = selectedindex;
-		}
-	}
+            }
+            previous = selectedindex;
+            min = UINT_MAX;
+            selectedindex = -1;
+        }
+        else {
+            fprintf (out, "Time %u: IDLE\n", tick);
+            previous = selectedindex;
+        }
+    }
     fprintf (out,"Finished at time %u\n\n", runfor);
 
     for (size_t i = 0; i < jobcount; ++i) {
         Job *job = &jobs[i];
         fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait,
             job->turnaround);
-	}
+    }
 }
 
 void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
