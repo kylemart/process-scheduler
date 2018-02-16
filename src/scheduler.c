@@ -236,16 +236,20 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
 {
     size_t jobcount = processlist_size(processes);
-    Job *jobs = jobs_new(processes);
-    JobQueue *ready = jobq_new(jobcount);
-    Job *selected = NULL;
-    uint timeleft = 0;
 
     fprintf(out, "%zu processes\n", jobcount);
     fputs("Using Round-Robin\n", out);
     fprintf(out, "Quantum %u\n\n", quantum);
 
-    for (uint tick = 0; tick <= runfor; ++tick) {
+    Job *jobs = jobs_new(processes);
+
+    size_t started = 0;
+    size_t finished = 0;
+    Job *selected = NULL;
+    ssize_t selectedindex = -1;
+    uint timeleft = 0;
+
+    for (uint tick = 0; tick < runfor; ++tick) {
         for (size_t i = 0; i < jobcount; ++i) {
             Job *job = &jobs[i];
             if (job->start < tick && job->burst > 0) {
@@ -255,8 +259,8 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
                 ++job->turnaround;
             }
             else if (job->start == tick) {
-                jobq_add(ready, job);
                 fprintf(out, "Time %u: %s arrived\n", tick, job->name);
+                ++started;
             }
         }
 
@@ -264,24 +268,32 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
             --timeleft;
             --selected->burst;
             if (selected->burst == 0) {
-                Job *done = jobq_remove(ready);
-                fprintf(out, "Time %u: %s finished\n", tick, done->name);
+                fprintf(out, "Time %u: %s finished\n", tick, selected->name);
+                ++finished;
             }
-            else if (timeleft == 0) {
-                jobq_lshift(ready);
+            else if (timeleft > 0) {
+                continue;
             }
-            else continue;
         }
 
         if (tick == runfor) {
             break;
         }
-        else if (jobq_empty(ready)) {
+        else if (started == finished) {
             selected = NULL;
+            selectedindex = -1;
             fprintf(out, "Time %u: IDLE\n", tick);
         }
         else {
-            selected = jobq_peek(ready);
+            for (size_t offset = 1; offset <= jobcount; ++offset) {
+                size_t index = (selectedindex + offset) % jobcount;
+                Job *job = &jobs[index];
+                if (job->burst > 0 && job->start <= tick) {
+                    selected = job;
+                    selectedindex = index;
+                    break;
+                }
+            }
             timeleft = min(selected->burst, quantum);
             fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
                 selected->name, selected->burst);
@@ -291,11 +303,15 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
 
     for (size_t i = 0; i < jobcount; ++i) {
         Job *job = &jobs[i];
-        fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait,
-            job->turnaround);
+        if (job->burst > 0) {
+            fprintf(out, "%s wait %u turnaround ?\n", job->name, job->wait);
+        }
+        else {
+            fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait,
+                job->turnaround);
+        }
     }
 
-    jobq_destroy(ready);
     jobs_destroy(jobs);
 }
 
