@@ -3,7 +3,7 @@
 #include <error.h>
 #include <scheduler.h>
 
-#define min(x, y) ((x < y) ? x : y)
+#define min(x, y) (((x) < (y)) ? (x) : (y))
 
 // #region Job(s) --------------------------------------------------------------
 
@@ -115,7 +115,6 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 {
     size_t jobcount = processlist_size(processes);
     Job *jobs = jobs_new(processes);
-    uint min = UINT_MAX;
     ssize_t previous = -1;
     ssize_t selectedindex = -1;
 
@@ -123,6 +122,8 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     fputs ("Using Shortest Job First (Pre)\n\n", out);
 
     for (uint tick = 0; tick < runfor; ++tick) {
+        uint min = UINT_MAX;
+
         for (size_t i = 0; i < jobcount; ++i) {
             Job *job = &jobs[i];
             if (job->start > tick || job->burst == 0) {
@@ -160,7 +161,6 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
                     selected->name);
             }
             previous = selectedindex;
-            min = UINT_MAX;
             selectedindex = -1;
         }
         else {
