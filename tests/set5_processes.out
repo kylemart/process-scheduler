@@ -12,6 +12,6 @@ Time 27: P3 selected (burst 3)
 Time 30: P3 finished
 Finished at time 30
 
-P1 wait 0 turnaround 24
 P2 wait 21 turnaround 24
 P3 wait 23 turnaround 26
+P1 wait 0 turnaround 24
