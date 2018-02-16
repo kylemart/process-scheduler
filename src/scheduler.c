@@ -109,7 +109,61 @@ static void jobq_lshift(JobQueue *q)
 
 void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 {
-    // ...
+    size_t jobcount = processlist_size(processes);
+    Job *jobs = jobs_new(processes);
+    JobQueue *ready = jobq_new(jobcount);
+    Job *selected = NULL;
+
+    fprintf(out, "%zu processes\n", jobcount);
+    fputs("Using First Come First Served\n\n", out);
+
+    for (uint tick = 0; tick <= runfor; ++tick) {
+        for (size_t i = 0; i < jobcount; ++i) {
+            Job *job = &jobs[i];
+            if (job->start < tick && job->burst > 0) {
+                if (job != selected) {
+                    ++job->wait;
+                }
+                ++job->turnaround;
+            }
+            else if (job->start == tick) {
+                jobq_add(ready, job);
+                fprintf(out, "Time %u: %s arrived\n", tick, job->name);
+            }
+        }
+
+        if (selected) {
+            --selected->burst;
+            if (selected->burst == 0) {
+                Job *done = jobq_remove(ready);
+                fprintf(out, "Time %u: %s finished\n", tick, done->name);
+            }
+            else continue;
+        }
+
+        if (tick == runfor) {
+            break;
+        }
+        else if (jobq_empty(ready)) {
+            selected = NULL;
+            fprintf(out, "Time %u: IDLE\n", tick);
+        }
+        else {
+            selected = jobq_peek(ready);
+            fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
+                selected->name, selected->burst);
+        }
+    }
+    fprintf(out, "Finished at time %u\n\n", runfor);
+
+    for (size_t i = 0; i < jobcount; ++i) {
+        Job *job = &jobs[i];
+        fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait,
+            job->turnaround);
+    }
+
+    jobq_destroy(ready);
+    jobs_destroy(jobs);
 }
 
 void run_sjf(FILE *out, uint runfor, ProcessList *processes)
