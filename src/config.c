@@ -39,17 +39,17 @@ ProcessList *config_processes(Config *config)
 bool config_load(Config **dest, FILE *cf)
 {
     Config config = { 0, 0, SCHEDULER_UNDEF, NULL };
-    size_t n = 0;
+    size_t processcount = 0;
     lineno = 1;
 
-    try(read_processcount(&n, cf));
+    try(read_processcount(&processcount, cf));
     try(read_runfor(&config.runfor, cf));
     try(read_use(&config.use, cf));
     if (config.use == SCHEDULER_RR) {
         try(read_quantum(&config.quantum, cf));
     }
-    if (n > 0) {
-        try(read_processes(&config.processes, n, cf));
+    if (processcount > 0) {
+        try(read_processes(&config.processes, processcount, cf));
     }
     try(read_end(cf));
 
