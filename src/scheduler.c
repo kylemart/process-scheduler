@@ -60,7 +60,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     // Make a for loop that goes one at a time through each tick till we run out of time
     Job *jobs = jobs_new(processes);
     uint min = 2147483646;
-    uint prev = 0;
+    uint prev = 2147483646;
     uint loop_hold = 0;
     for (uint tick = 0; tick < runfor; tick++){
     	// Here I am looping through each process to check its burst time
