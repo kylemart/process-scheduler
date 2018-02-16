@@ -77,7 +77,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 			}
 			if (job->start <= tick && job->burst != 0){
 				jobs[loop].turnaround ++;
-				if (min != loop){
+				if (loop_hold != loop){
 					jobs[loop].wait ++;
 				}
 			}
