@@ -112,7 +112,7 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 	}
 	
     }
-    fprintf(out, "Finished at time %u\n\n", time - 1);
+    fprintf(out, "Finished at time %u\n\n", time);
     for(size_t i = 0; i < jobcount; i++)
     {
         Job *job = &jobs[i];
