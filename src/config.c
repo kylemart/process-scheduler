@@ -4,7 +4,7 @@
 #include <process.h>
 #include <read.h>
 
-#define try(read) if(!read) return false;
+#define try(read) if (!read) return false;
 
 ulong lineno;
 
