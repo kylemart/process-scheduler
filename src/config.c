@@ -4,6 +4,8 @@
 #include <process.h>
 #include <read.h>
 
+#define try(read) if (!read) return false
+
 ulong lineno;
 
 struct Config
@@ -37,27 +39,19 @@ ProcessList *config_processes(Config *config)
 bool config_load(Config **dest, FILE *cf)
 {
     Config config = { 0, 0, SCHEDULER_UNDEF, NULL };
-    size_t n = 0;
+    size_t processcount = 0;
     lineno = 1;
 
-    if (!read_processcount(&n, cf)) {
-        return false;
+    try(read_processcount(&processcount, cf));
+    try(read_runfor(&config.runfor, cf));
+    try(read_use(&config.use, cf));
+    if (config.use == SCHEDULER_RR) {
+        try(read_quantum(&config.quantum, cf));
     }
-    if (!read_runfor(&config.runfor, cf)) {
-        return false;
+    if (processcount > 0) {
+        try(read_processes(&config.processes, processcount, cf));
     }
-    if (!read_use(&config.use, cf)) {
-        return false;
-    }
-    if (config.use == SCHEDULER_RR && !read_quantum(&config.quantum, cf)) {
-        return false;
-    }
-    if (n > 0 && !read_processes(&config.processes, n, cf)) {
-        return false;
-    }
-    if (!read_end(cf)) {
-        return false;
-    }
+    try(read_end(cf));
 
     *dest = amalloc(sizeof(Config));
     memcpy(*dest, &config, sizeof(Config));
