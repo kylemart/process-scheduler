@@ -94,6 +94,8 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 			}
 			prev = loop_hold;
 			min = 2147483646;
+			loop_hold = 2147483646;
+			
 		}	
 		else {
 		    fprintf (out, "Time %u: IDLE\n", tick);
