@@ -75,13 +75,21 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 			if (job->start == tick){
 				fprintf(out, "Time %u: %s arrived\n",tick, job->name);
 			}
-			if (job->start <= tick && job->burst != 0){
+		/*	if (job->start <= tick && job->burst != 0){
 				jobs[loop].turnaround ++;
 				if (loop_hold != loop){
 					jobs[loop].wait ++;
 				}
 			}
-    		
+    		*/
+		}
+		for (size_t loop = 0; loop < jobcount ; loop++){
+			if (jobs[loop].start <= tick && jobs[loop].burst != 0){
+					jobs[loop].turnaround ++;
+					if (loop_hold != loop){
+						jobs[loop].wait ++;
+					}
+				}
 		}
 		//Make sure something has arrived
 		if (loop_hold <= jobcount){
