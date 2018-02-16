@@ -1,4 +1,5 @@
 #include <string.h>
+#include <limits.h>
 #include <error.h>
 #include <scheduler.h>
 
@@ -56,7 +57,7 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
     int start = 0;
     int finish = 0;
     ssize_t index = -1;
-    int time=0; 
+    int time=0;
 
     for(uint tick = 0; tick <= runfor; ++tick)
     {
@@ -70,7 +71,7 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 	    }
 	    else if(job->start <= tick && job->burst > 0)
 	    {
-		if (job != current) 
+		if (job != current)
                 {
                     ++job->wait;
                 }
@@ -95,7 +96,7 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
         if(start == finish)
 		;
 //            fprintf(out, "time %u: IDLE\n", tick);
-	else 
+	else
 	{
 	    for(size_t j = 0; j < jobcount; ++j)
 	    {
@@ -110,7 +111,7 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 	    if(bursting == 0)
 	        fprintf(out, "Time %u: %s selected (burst %u)\n", tick, current->name, current->burst);
 	}
-	
+
     }
     fprintf(out, "Finished at time %u\n\n", time);
     for(size_t i = 0; i < jobcount; i++)
@@ -123,74 +124,68 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 
 void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 {
-    // Im so rusty at C, this'll be fun
-    // Im gonna borrow some of your code Kyle ;)
     size_t jobcount = processlist_size(processes);
-    fprintf (out, "%zu processes\n", jobcount);
-	
-	// I modified this one just a little bit though
-    fputs ("Using Shortest Job First (Pre)\n\n", out);
-    
-    // Starting the actual SJF code now
-    // Make a for loop that goes one at a time through each tick till we run out of time
     Job *jobs = jobs_new(processes);
-    uint min = 2147483646;
-    uint prev = 2147483646;
-    uint loop_hold = 2147483646;
-    for (uint tick = 0; tick < runfor; tick++){
-    	// Here I am looping through each process to check its burst time
-    	// And printing it to the output file to test
-        for (size_t loop = 0; loop < jobcount ; loop++){
-    		// Read its info and print it
-    		Job *job = &jobs[loop];
-    		if (min > job->burst && job->start <= tick && job->burst != 0){
+    uint min = UINT_MAX;
+    ssize_t previous = -1;
+    ssize_t selectedindex = -1;
+
+    fprintf (out, "%zu processes\n", jobcount);
+    fputs ("Using Shortest Job First (Pre)\n\n", out);
+
+    for (uint tick = 0; tick < runfor; ++tick) {
+        for (size_t i = 0; i < jobcount; ++i) {
+    		Job *job = &jobs[i];
+            if (job->start > tick || job->burst == 0) {
+                continue;
+            }
+    		if (min > job->burst) {
     			min = job->burst;
-    			loop_hold = loop;
+    			selectedindex = i;
 			}
-			if (job->start == tick){
-				fprintf(out, "Time %u: %s arrived\n",tick, job->name);
+			if (job->start == tick) {
+				fprintf(out, "Time %u: %s arrived\n", tick, job->name);
 			}
-		/*	if (job->start <= tick && job->burst != 0){
-				jobs[loop].turnaround ++;
-				if (loop_hold != loop){
-					jobs[loop].wait ++;
-				}
-			}
-    		*/
 		}
-		for (size_t loop = 0; loop < jobcount ; loop++){
-			if (jobs[loop].start <= tick && jobs[loop].burst != 0){
-					jobs[loop].turnaround ++;
-					if (loop_hold != loop){
-						jobs[loop].wait ++;
-					}
-				}
+
+        for (size_t i = 0; i < jobcount; ++i) {
+            Job *job = &jobs[i];
+            if (job->start > tick || job->burst == 0) {
+                continue;
+            }
+            ++job->turnaround;
+			if (selectedindex != i) {
+				++job->wait;
+			}
+        }
+
+		if (selectedindex >= 0) {
+            Job *selected = &jobs[selectedindex];
+            if (selectedindex != previous){
+				fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
+                    selected->name, selected->burst);
+			}
+			--selected->burst;
+            if (selected->burst == 0){
+				fprintf(out, "Time %u: %s finished\n", tick + 1,
+                    selected->name);
+			}
+			previous = selectedindex;
+			min = UINT_MAX;
+			selectedindex = -1;
 		}
-		//Make sure something has arrived
-		if (loop_hold <= jobcount){
-			if (loop_hold != prev){
-				fprintf(out, "Time %u: %s selected (burst %u)\n", tick, jobs[loop_hold].name, jobs[loop_hold].burst);
-			}
-			jobs[loop_hold].burst = jobs[loop_hold].burst-1;
-            if (jobs[loop_hold].burst == 0){
-				fprintf(out, "Time %u: %s finished\n", tick+1, jobs[loop_hold].name);
-			}
-			prev = loop_hold;
-			min = 2147483646;
-			loop_hold = 2147483646;
-			
-		}	
 		else {
 		    fprintf (out, "Time %u: IDLE\n", tick);
-			prev = loop_hold;
+			previous = selectedindex;
 		}
 	}
     fprintf (out,"Finished at time %u\n\n", runfor);
-    for (size_t loop = 0; loop <jobcount ; loop++){
-        fprintf(out, "%s wait %u turnaround %u\n", jobs[loop].name, jobs[loop].wait,jobs[loop].turnaround);
+
+    for (size_t i = 0; i < jobcount; ++i) {
+        Job *job = &jobs[i];
+        fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait,
+            job->turnaround);
 	}
-    
-    
 }
 
 void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
