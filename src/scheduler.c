@@ -3,7 +3,7 @@
 #include <error.h>
 #include <scheduler.h>
 
-#define min(x, y) (((x) < (y)) ? (x) : (y))
+#define min(x, y) ((x) < (y)) ? (x) : (y)
 
 // #region Job(s) --------------------------------------------------------------
 
@@ -13,21 +13,21 @@ typedef struct Job
     uint start;
     uint burst;
     uint wait;
-    uint turnaround;
+    uint finished;
 } Job;
 
 static Job *jobs_new(ProcessList *processes)
 {
-    size_t n = processlist_size(processes);
-    Job *jobs = amalloc(n * sizeof(Job));
-    for (size_t i = 0; i < n; ++i) {
+    size_t jobcount = processlist_size(processes);
+    Job *jobs = amalloc(jobcount * sizeof(Job));
+    for (size_t i = 0; i < jobcount; ++i) {
         Process *p = processlist_get(processes, i);
         jobs[i] = (Job) {
             .name = process_name(p),
             .start = process_arrival(p),
             .burst = process_burst(p),
             .wait = 0,
-            .turnaround = 0
+            .finished = 0
         };
     }
     return jobs;
@@ -38,6 +38,19 @@ static void jobs_destroy(Job *jobs)
     free(jobs);
 }
 
+static int sort_by_arrival(const void *va, const void *vb)
+{
+    const Job *ja = (const Job *)va;
+    const Job *jb = (const Job *)vb;
+    if (ja->start < jb->start) {
+        return -1;
+    }
+    else if (ja->start > jb->start) {
+        return 1;
+    }
+    return 0;
+}
+
 // #endregion ------------------------------------------------------------------
 
 // #region Scheduling Algorithms -----------------------------------------------
@@ -46,66 +59,59 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 {
     size_t jobcount = processlist_size(processes);
     Job *jobs = jobs_new(processes);
-    size_t started = 0;
-    size_t finished = 0;
-    Job *selected = NULL;
-    ssize_t selectedindex = -1;
+    size_t finished = 0, arrived = 0;
+    ssize_t select = -1;
+
+    qsort(jobs, jobcount, sizeof(Job), sort_by_arrival);
 
     fprintf(out, "%zu processes\n", jobcount);
     fputs("Using First Come First Served\n\n", out);
 
     for (uint tick = 0; tick <= runfor; ++tick) {
         for (size_t i = 0; i < jobcount; ++i) {
-            Job *job = &jobs[i];
-            if (job->start < tick && job->burst > 0) {
-                if (job != selected) {
-                    ++job->wait;
+            if (jobs[i].start > tick || jobs[i].burst == 0) {
+                continue;
+            }
+            else if (jobs[i].start == tick) {
+                fprintf(out, "Time %u: %s arrived\n", tick, jobs[i].name);
+                ++arrived;
+            }
+            else if (i != select) {
+                ++jobs[i].wait;
+            }
+        }
+
+        if (select >= 0 && jobs[select].burst == 0) {
+            fprintf(out, "Time %u: %s finished\n", tick, jobs[select].name);
+            jobs[select].finished = tick;
+            select = -1;
+            ++finished;
+        }
+
+        if (finished < arrived) {
+            if (select == -1) {
+                for (size_t offset = 1; offset <= jobcount; ++offset) {
+                    size_t i = (select + offset) % jobcount;
+                    if (jobs[i].start <= tick && jobs[i].burst > 0) {
+                        select = i;
+                        break;
+                    }
                 }
-                ++job->turnaround;
+                fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
+                    jobs[select].name, jobs[select].burst);
             }
-            else if (job->start == tick) {
-                fprintf(out, "Time %u: %s arrived\n", tick, job->name);
-                ++started;
-            }
+            --jobs[select].burst;
         }
 
-        if (selected) {
-            --selected->burst;
-            if (selected->burst == 0) {
-                fprintf(out, "Time %u: %s finished\n", tick, selected->name);
-                ++finished;
-            }
-            else continue;
-        }
-
-        if (tick == runfor) {
-            break;
-        }
-        else if (started == finished) {
-            selected = NULL;
-            selectedindex = -1;
+        if (tick < runfor && finished == arrived) {
             fprintf(out, "Time %u: IDLE\n", tick);
-        }
-        else {
-            for (size_t offset = 1; offset <= jobcount; ++offset) {
-                size_t index = (selectedindex + offset) % jobcount;
-                Job *job = &jobs[index];
-                if (job->burst > 0 && job->start <= tick) {
-                    selected = job;
-                    selectedindex = index;
-                    break;
-                }
-            }
-            fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
-                selected->name, selected->burst);
         }
     }
     fprintf(out, "Finished at time %u\n\n", runfor);
 
     for (size_t i = 0; i < jobcount; ++i) {
-        Job *job = &jobs[i];
-        fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait,
-                job->turnaround);
+        fprintf(out, "%s wait %u turnaround %u\n", jobs[i].name, jobs[i].wait,
+            jobs[i].finished - jobs[i].start);
     }
 
     jobs_destroy(jobs);
@@ -115,77 +121,72 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
 {
     size_t jobcount = processlist_size(processes);
     Job *jobs = jobs_new(processes);
-    ssize_t previous = -1;
-    ssize_t selectedindex = -1;
+    size_t finished = 0, arrived = 0;
+    ssize_t select = -1;
 
-    fprintf (out, "%zu processes\n", jobcount);
-    fputs ("Using Shortest Job First (Pre)\n\n", out);
+    qsort(jobs, jobcount, sizeof(Job), sort_by_arrival);
 
-    for (uint tick = 0; tick < runfor; ++tick) {
-        uint min = UINT_MAX;
+    fprintf(out, "%zu processes\n", jobcount);
+    fputs("Using Shortest Job First (Pre)\n\n", out);
+
+    for (uint tick = 0; tick <= runfor; ++tick) {
+        ssize_t shortest = -1;
 
         for (size_t i = 0; i < jobcount; ++i) {
-            Job *job = &jobs[i];
-            if (job->start > tick || job->burst == 0) {
+            if (jobs[i].start > tick || jobs[i].burst == 0) {
                 continue;
             }
-            if (min > job->burst) {
-                min = job->burst;
-                selectedindex = i;
+            else if (jobs[i].start == tick) {
+                fprintf(out, "Time %u: %s arrived\n", tick, jobs[i].name);
+                ++arrived;
             }
-            if (job->start == tick) {
-                fprintf(out, "Time %u: %s arrived\n", tick, job->name);
+            else if (i != select) {
+                ++jobs[i].wait;
+            }
+            if (shortest == -1 || jobs[i].burst < jobs[shortest].burst) {
+                shortest = i;
             }
         }
 
-        for (size_t i = 0; i < jobcount; ++i) {
-            Job *job = &jobs[i];
-            if (job->start > tick || job->burst == 0) {
-                continue;
-            }
-            ++job->turnaround;
-            if (selectedindex != i) {
-                ++job->wait;
-            }
+        if (select >= 0 && jobs[select].burst == 0) {
+            fprintf(out, "Time %u: %s finished\n", tick, jobs[select].name);
+            jobs[select].finished = tick;
+            select = -1;
+            ++finished;
         }
 
-        if (selectedindex >= 0) {
-            Job *selected = &jobs[selectedindex];
-            if (selectedindex != previous){
+        if (finished < arrived) {
+            if (select == -1 || select != shortest) {
+                select = shortest;
                 fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
-                    selected->name, selected->burst);
+                    jobs[select].name, jobs[select].burst);
             }
-            --selected->burst;
-            if (selected->burst == 0) {
-                fprintf(out, "Time %u: %s finished\n", tick + 1,
-                    selected->name);
-            }
-            previous = selectedindex;
-            selectedindex = -1;
+            --jobs[select].burst;
         }
-        else {
-            fprintf (out, "Time %u: IDLE\n", tick);
-            previous = selectedindex;
+
+        if (tick < runfor && finished == arrived) {
+            fprintf(out, "Time %u: IDLE\n", tick);
         }
     }
-    fprintf (out,"Finished at time %u\n\n", runfor);
+    fprintf(out, "Finished at time %u\n\n", runfor);
 
     for (size_t i = 0; i < jobcount; ++i) {
-        Job *job = &jobs[i];
-        fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait,
-            job->turnaround);
+        fprintf(out, "%s wait %u turnaround %u\n", jobs[i].name, jobs[i].wait,
+            jobs[i].finished - jobs[i].start);
     }
+
+    jobs_destroy(jobs);
 }
 
 void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
 {
     size_t jobcount = processlist_size(processes);
     Job *jobs = jobs_new(processes);
-    size_t started = 0;
-    size_t finished = 0;
-    Job *selected = NULL;
-    ssize_t selectedindex = -1;
-    uint timeleft = 0;
+    size_t finished = 0, arrived = 0;
+    ssize_t select = -1;
+    uint timer = 0;
+
+    qsort(jobs, jobcount, sizeof(Job), sort_by_arrival);
 
     fprintf(out, "%zu processes\n", jobcount);
     fputs("Using Round-Robin\n", out);
@@ -193,60 +194,51 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
 
     for (uint tick = 0; tick <= runfor; ++tick) {
         for (size_t i = 0; i < jobcount; ++i) {
-            Job *job = &jobs[i];
-            if (job->start < tick && job->burst > 0) {
-                if (job != selected) {
-                    ++job->wait;
-                }
-                ++job->turnaround;
-            }
-            else if (job->start == tick) {
-                fprintf(out, "Time %u: %s arrived\n", tick, job->name);
-                ++started;
-            }
-        }
-
-        if (selected) {
-            --timeleft;
-            --selected->burst;
-            if (selected->burst == 0) {
-                fprintf(out, "Time %u: %s finished\n", tick, selected->name);
-                ++finished;
-            }
-            else if (timeleft > 0) {
+            if (jobs[i].start > tick || jobs[i].burst == 0) {
                 continue;
             }
+            else if (jobs[i].start == tick) {
+                fprintf(out, "Time %u: %s arrived\n", tick, jobs[i].name);
+                ++arrived;
+            }
+            else if (i != select) {
+                ++jobs[i].wait;
+            }
         }
 
-        if (tick == runfor) {
-            break;
+        if (select >= 0 && jobs[select].burst == 0) {
+            fprintf(out, "Time %u: %s finished\n", tick, jobs[select].name);
+            jobs[select].finished = tick;
+            select = -1;
+            ++finished;
         }
-        else if (started == finished) {
-            selected = NULL;
-            selectedindex = -1;
-            fprintf(out, "Time %u: IDLE\n", tick);
-        }
-        else {
-            for (size_t offset = 1; offset <= jobcount; ++offset) {
-                size_t index = (selectedindex + offset) % jobcount;
-                Job *job = &jobs[index];
-                if (job->burst > 0 && job->start <= tick) {
-                    selected = job;
-                    selectedindex = index;
-                    break;
+
+        if (finished < arrived) {
+            if (select == -1 || timer == 0) {
+                for (size_t offset = 1; offset <= jobcount; ++offset) {
+                    size_t i = (select + offset) % jobcount;
+                    if (jobs[i].start <= tick && jobs[i].burst > 0) {
+                        select = i;
+                        break;
+                    }
                 }
+                timer = min(jobs[select].burst, quantum);
+                fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
+                    jobs[select].name, jobs[select].burst);
             }
-            timeleft = min(selected->burst, quantum);
-            fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
-                selected->name, selected->burst);
+            --jobs[select].burst;
+            --timer;
+        }
+
+        if (tick < runfor && finished == arrived) {
+            fprintf(out, "Time %u: IDLE\n", tick);
         }
     }
     fprintf(out, "Finished at time %u\n\n", runfor);
 
     for (size_t i = 0; i < jobcount; ++i) {
-        Job *job = &jobs[i];
-        fprintf(out, "%s wait %u turnaround %u\n", job->name, job->wait,
-                job->turnaround);
+        fprintf(out, "%s wait %u turnaround %u\n", jobs[i].name, jobs[i].wait,
+            jobs[i].finished - jobs[i].start);
     }
 
     jobs_destroy(jobs);

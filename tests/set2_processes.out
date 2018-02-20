@@ -17,5 +17,5 @@ Time 14: P2 finished
 Time 14: IDLE
 Finished at time 15
 
-P1 wait 5 turnaround 10
 P2 wait 5 turnaround 14
+P1 wait 5 turnaround 10
