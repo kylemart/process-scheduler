@@ -56,6 +56,14 @@ static void jobs_destroy(Job *jobs)
 
 // #region Scheduling Algorithms -----------------------------------------------
 
+static void print_wait_turnaround(FILE *out, Job *jobs, size_t jobcount)
+{
+    for (size_t i = 0; i < jobcount; ++i) {
+        fprintf(out, "%s wait %u turnaround %u\n", jobs[i].name, jobs[i].wait,
+            jobs[i].finished - jobs[i].start);
+    }
+}
+
 void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 {
     size_t jobcount = processlist_size(processes);
@@ -89,13 +97,7 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
 
         if (finished < arrived) {
             if (select == -1) {
-                for (size_t offset = 1; offset <= jobcount; ++offset) {
-                    size_t i = (select + offset) % jobcount;
-                    if (jobs[i].start <= tick && jobs[i].burst > 0) {
-                        select = i;
-                        break;
-                    }
-                }
+                select = finished;
                 fprintf(out, "Time %u: %s selected (burst %u)\n", tick,
                     jobs[select].name, jobs[select].burst);
             }
@@ -108,10 +110,7 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
     }
     fprintf(out, "Finished at time %u\n\n", runfor);
 
-    for (size_t i = 0; i < jobcount; ++i) {
-        fprintf(out, "%s wait %u turnaround %u\n", jobs[i].name, jobs[i].wait,
-            jobs[i].finished - jobs[i].start);
-    }
+    print_wait_turnaround(out, jobs, jobcount);
 
     jobs_destroy(jobs);
 }
@@ -167,10 +166,7 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     }
     fprintf(out, "Finished at time %u\n\n", runfor);
 
-    for (size_t i = 0; i < jobcount; ++i) {
-        fprintf(out, "%s wait %u turnaround %u\n", jobs[i].name, jobs[i].wait,
-            jobs[i].finished - jobs[i].start);
-    }
+    print_wait_turnaround(out, jobs, jobcount);
 
     jobs_destroy(jobs);
 }
@@ -231,10 +227,7 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
     }
     fprintf(out, "Finished at time %u\n\n", runfor);
 
-    for (size_t i = 0; i < jobcount; ++i) {
-        fprintf(out, "%s wait %u turnaround %u\n", jobs[i].name, jobs[i].wait,
-            jobs[i].finished - jobs[i].start);
-    }
+    print_wait_turnaround(out, jobs, jobcount);
 
     jobs_destroy(jobs);
 }
