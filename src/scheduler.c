@@ -43,7 +43,6 @@ static Job *jobs_new(ProcessList *processes)
             .finished = 0
         };
     }
-    qsort(jobs, jobcount, sizeof(Job), cmp_start);
     return jobs;
 }
 
@@ -70,6 +69,8 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
     Job *jobs = jobs_new(processes);
     size_t finished = 0, arrived = 0;
     ssize_t select = -1;
+
+    qsort(jobs, jobcount, sizeof(Job), cmp_start);
 
     fprintf(out, "%zu processes\n", jobcount);
     fputs("Using First Come First Served\n\n", out);
@@ -121,6 +122,8 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     Job *jobs = jobs_new(processes);
     size_t finished = 0, arrived = 0;
     ssize_t select = -1;
+
+    qsort(jobs, jobcount, sizeof(Job), cmp_start);
 
     fprintf(out, "%zu processes\n", jobcount);
     fputs("Using Shortest Job First (Pre)\n\n", out);
@@ -178,6 +181,8 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
     size_t finished = 0, arrived = 0;
     ssize_t select = -1;
     uint timer = 0;
+
+    qsort(jobs, jobcount, sizeof(Job), cmp_start);
 
     fprintf(out, "%zu processes\n", jobcount);
     fputs("Using Round-Robin\n", out);
