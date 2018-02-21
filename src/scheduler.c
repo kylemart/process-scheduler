@@ -16,19 +16,6 @@ typedef struct Job
     uint finished;
 } Job;
 
-static int cmp_start(const void *arg1, const void *arg2)
-{
-    const Job *job1 = arg1;
-    const Job *job2 = arg2;
-    if (job1->start < job2->start) {
-        return -1;
-    }
-    else if (job1->start > job2->start) {
-        return 1;
-    }
-    return 0;
-}
-
 static Job *jobs_new(ProcessList *processes)
 {
     size_t jobcount = processlist_size(processes);
@@ -49,6 +36,19 @@ static Job *jobs_new(ProcessList *processes)
 static void jobs_destroy(Job *jobs)
 {
     free(jobs);
+}
+
+static int cmp_start(const void *arg1, const void *arg2)
+{
+    const Job *job1 = arg1;
+    const Job *job2 = arg2;
+    if (job1->start < job2->start) {
+        return -1;
+    }
+    else if (job1->start > job2->start) {
+        return 1;
+    }
+    return 0;
 }
 
 // #endregion ------------------------------------------------------------------
