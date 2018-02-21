@@ -16,6 +16,19 @@ typedef struct Job
     uint finished;
 } Job;
 
+static int cmp_start(const void *arg1, const void *arg2)
+{
+    const Job *job1 = arg1;
+    const Job *job2 = arg2;
+    if (job1->start < job2->start) {
+        return -1;
+    }
+    else if (job1->start > job2->start) {
+        return 1;
+    }
+    return 0;
+}
+
 static Job *jobs_new(ProcessList *processes)
 {
     size_t jobcount = processlist_size(processes);
@@ -30,25 +43,13 @@ static Job *jobs_new(ProcessList *processes)
             .finished = 0
         };
     }
+    qsort(jobs, jobcount, sizeof(Job), cmp_start);
     return jobs;
 }
 
 static void jobs_destroy(Job *jobs)
 {
     free(jobs);
-}
-
-static int sort_by_arrival(const void *va, const void *vb)
-{
-    const Job *ja = (const Job *)va;
-    const Job *jb = (const Job *)vb;
-    if (ja->start < jb->start) {
-        return -1;
-    }
-    else if (ja->start > jb->start) {
-        return 1;
-    }
-    return 0;
 }
 
 // #endregion ------------------------------------------------------------------
@@ -61,8 +62,6 @@ void run_fcfs(FILE *out, uint runfor, ProcessList *processes)
     Job *jobs = jobs_new(processes);
     size_t finished = 0, arrived = 0;
     ssize_t select = -1;
-
-    qsort(jobs, jobcount, sizeof(Job), sort_by_arrival);
 
     fprintf(out, "%zu processes\n", jobcount);
     fputs("Using First Come First Served\n\n", out);
@@ -124,8 +123,6 @@ void run_sjf(FILE *out, uint runfor, ProcessList *processes)
     size_t finished = 0, arrived = 0;
     ssize_t select = -1;
 
-    qsort(jobs, jobcount, sizeof(Job), sort_by_arrival);
-
     fprintf(out, "%zu processes\n", jobcount);
     fputs("Using Shortest Job First (Pre)\n\n", out);
 
@@ -185,8 +182,6 @@ void run_rr(FILE *out, uint runfor, uint quantum, ProcessList *processes)
     size_t finished = 0, arrived = 0;
     ssize_t select = -1;
     uint timer = 0;
-
-    qsort(jobs, jobcount, sizeof(Job), sort_by_arrival);
 
     fprintf(out, "%zu processes\n", jobcount);
     fputs("Using Round-Robin\n", out);
